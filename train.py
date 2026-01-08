@@ -10,10 +10,11 @@ from sklearn.compose import ColumnTransformer
 # // columntransformer lets us applies different transformations to different columns at the same time 
 
 from sklearn.pipeline import Pipeline 
-# // pipeline lets us do everything in one step in same order as every time as before 
+# // pipeline lets us do everything in one step in same order as every single time without it wed be doing one step 
+# at a time and might forget a step or do it in wrong order 
 
 def main():
-    df = pd.read_csv('data.csv') ##df is a dataframe
+    df = pd.read_csv("data/data.csv")  ##df is a dataframe
     # df is full dataset and we are reading it using pandas library at this point 
 
     # X = Input (what we want to predict) , Y = output (what data we have to predict it)
