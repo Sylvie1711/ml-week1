@@ -1,17 +1,21 @@
 import pandas as pd
 
 from sklearn.model_selection import train_test_split
+#used to split data into training and testing sets
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
-
 # // standardscalar stretches small values to be larger and larger values to be smaller to even out the playin field
 # // onehotencoder converts categorical variables into a 0/1 format so that everything is YES or NO 
-
 from sklearn.compose import ColumnTransformer
 # // columntransformer lets us applies different transformations to different columns at the same time 
-
 from sklearn.pipeline import Pipeline 
 # // pipeline lets us do everything in one step in same order as every single time without it wed be doing one step 
 # at a time and might forget a step or do it in wrong order 
+from sklearn.linear_model import LinearRegression
+# // linearregression is the model used here because its simple and easy to understand for beginners
+from sklearn.metrics import mean_squared_error
+# // mean_squared_error is a metric to evaluate how far are you off in your predictions and answers?
+from sklearn.impute import SimpleImputer
+# // simpleimputer is used to fill in missing values in the dataset (added after the code crashed)
 
 def main():
     df = pd.read_csv("data/data.csv")  ##df is a dataframe
@@ -59,6 +63,7 @@ def main():
     #  DEFINE PREPROCESSING RULES
     # =========================
     numeric_transformer = Pipeline(steps=[
+        ("imputer", SimpleImputer(strategy="median")),
         ("scaler", StandardScaler())
     ])
 
@@ -101,9 +106,26 @@ def main():
     #apply the SAME rules to it (do NOT relearn from test data!)
     # =========================
 
-    print("Train shape:", X_train_processed.shape) #just tells us how many rows and columns in training data after processing
-    print("Test shape:", X_test_processed.shape)  #just tells us how many rows and colums in test data after processing 
+    print("Train data shape:", X_train_processed.shape) #just tells us how many rows and columns in training data after processing
+    print("Test data shape:", X_test_processed.shape)  #just tells us how many rows and colums in test data after processing 
 
+    # 9 introducing the training model into the codebase
+
+    model = LinearRegression() ## regression model cause its the simplest and easiest to understand 
+    model.fit(X_train_processed, Y_train) # fitting the data to the model
+
+    # =========================
+
+    #prediction based on test data
+    Y_pred = model.predict(X_test_processed) ## predicting the output based on test data
+
+    # =========================
+    # 10. EVALUATE MODEL
+    mse = mean_squared_error(Y_test, Y_pred) ##finding how off our predictions were from actual values 
+    rmse = mse ** 0.5  # Root Mean Squared Error
+
+    print("RMSE:", rmse)
+    # =========================
 
 if __name__ == "__main__":
     main()
