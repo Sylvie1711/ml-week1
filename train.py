@@ -1,4 +1,6 @@
 import pandas as pd
+import numpy as np
+# // pandas is used for data manipulation and analysis, numpy is used for numerical operations
 
 from sklearn.model_selection import train_test_split
 #used to split data into training and testing sets
@@ -36,6 +38,7 @@ def main():
     # Creating a training data and a testing data set from our full dataset in order to train the model 
 
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+    Y_train_log = np.log1p(Y_train)  ##log1p is log(1+x) it helps with skewed data
 
     # test_size = 0.2 means 20% of data will be used for testing, 80% for training 
     # if youre wondering where the 42 comes from then its an inside joke because fuck programmers and data scientists
@@ -109,16 +112,16 @@ def main():
     print("Train data shape:", X_train_processed.shape) #just tells us how many rows and columns in training data after processing
     print("Test data shape:", X_test_processed.shape)  #just tells us how many rows and colums in test data after processing 
 
-    # 9 introducing the training model into the codebase
+    # 9 Model Training
 
     model = LinearRegression() ## regression model cause its the simplest and easiest to understand 
-    model.fit(X_train_processed, Y_train) # fitting the data to the model
+    model.fit(X_train_processed, Y_train_log) # fitting the data to the model
 
     # =========================
 
     #prediction based on test data
-    Y_pred = model.predict(X_test_processed) ## predicting the output based on test data
-
+    Y_pred_log = model.predict(X_test_processed) ## predicting the output based on test data
+    Y_pred = np.expm1(Y_pred_log)  ## reversing the log1p transformation to get back to original scale
     # =========================
     # 10. EVALUATE MODEL
     mse = mean_squared_error(Y_test, Y_pred) ##finding how off our predictions were from actual values 
@@ -126,6 +129,28 @@ def main():
 
     print("RMSE:", rmse)
     # =========================
+
+
+    ##11. MODEL INTERPRETATION 
+    #feature names 
+    feature_names = preprocessor.get_feature_names_out()
+
+    # Get learned coefficients from the model
+    coefficients = model.coef_
+
+    # Create a DataFrame for easy inspection
+    coef_df = pd.DataFrame({
+        "feature": feature_names,
+        "coefficient": coefficients
+    })
+
+    # Sort by absolute impact
+    coef_df["abs_coef"] = coef_df["coefficient"].abs()
+    coef_df = coef_df.sort_values("abs_coef", ascending=False)
+
+    print("\nTop 10 most influential features:")
+    print(coef_df.head(10))
+
 
 if __name__ == "__main__":
     main()
